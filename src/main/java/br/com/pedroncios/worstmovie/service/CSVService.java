@@ -3,7 +3,6 @@ package br.com.pedroncios.worstmovie.service;
 import br.com.pedroncios.worstmovie.dto.MovieDTO;
 import br.com.pedroncios.worstmovie.dto.ProducerDTO;
 import br.com.pedroncios.worstmovie.dto.StudioDTO;
-import br.com.pedroncios.worstmovie.repository.ProducerRepository;
 import br.com.pedroncios.worstmovie.util.Utils;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
@@ -20,9 +19,9 @@ import java.util.List;
 @Service
 public class CSVService {
 
-    private static final String CSV_FILE_PATH
-            = "D:\\Development\\Java\\Spring\\worst-movie-api\\movielist.csv";
+    private static final String CSV_FILE_PATH = "D:\\Development\\Java\\Spring\\worst-movie-api\\3producers_movielist.csv";
 
+    // Colunas do CSV
     private static final int H_YEAR = 0;
     private static final int H_TITLE = 1;
     private static final int H_STUDIOS = 2;
@@ -31,8 +30,6 @@ public class CSVService {
 
     @Autowired
     private MovieService movieService;
-    @Autowired
-    private ProducerRepository producerRepository;
 
     public void readDataLineByLine()
     {
@@ -44,42 +41,26 @@ public class CSVService {
                     .withCSVParser(parser)
                     .build();
 
-            String[] nextRecord = csvReader.readNext();
+            String[] nextRecord = csvReader.readNext(); // Pula o header
             while ((nextRecord = csvReader.readNext()) != null) {
-                List<ProducerDTO> producerDTOList = parseProducers(nextRecord[H_PRODUCERS]);
-                if (producerDTOList == null || producerDTOList.isEmpty()) {
+                List<ProducerDTO> producerDTOList = Utils.parseObjects(nextRecord[H_PRODUCERS], ProducerDTO::new);
+                if (producerDTOList.isEmpty()) {
                     Utils.log("WARN", "Não foi possível carregar os produtores do filme \"" + nextRecord[H_TITLE] + "\". Atenção! O filme será ignorado");
                     continue;
                 }
 
-                List<StudioDTO> studioDTOList = new ArrayList<>();
-                studioDTOList.add(new StudioDTO(nextRecord[H_STUDIOS]));
+                List<StudioDTO> studioDTOList = Utils.parseObjects(nextRecord[H_STUDIOS], StudioDTO::new);
+                if (studioDTOList.isEmpty()) {
+                    Utils.log("WARN", "Não foi possível carregar os estúdios do filme \"" + nextRecord[H_TITLE] + "\". Atenção! O filme será ignorado");
+                    continue;
+                }
 
                 MovieDTO movieDTO = new MovieDTO(nextRecord[H_TITLE], Integer.parseInt(nextRecord[H_YEAR]), nextRecord[H_WINNER].equals("yes"));
-                this.movieService.saveMovie(movieDTO, producerDTOList, studioDTOList);
+                this.movieService.createMovie(movieDTO, producerDTOList, studioDTOList);
             }
         }
         catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private List<ProducerDTO> parseProducers(String producers) {
-
-        if (producers == null || producers.isBlank()) {
-            return null;
-        }
-
-        List<ProducerDTO> producerDTOList = new ArrayList<>();
-        String[] producersNames = producers.split(",| and ");
-
-        for (String name : producersNames) {
-            String trimmedName = name.trim();
-            if (!trimmedName.isEmpty()) {
-                producerDTOList.add(new ProducerDTO(trimmedName));
-            }
-        }
-
-        return producerDTOList;
     }
 }

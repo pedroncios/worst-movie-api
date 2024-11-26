@@ -18,7 +18,7 @@ public class StudioService {
         return this.studioRepository.findFirstByName(dto.name());
     }
 
-    public Studio saveStudio(Studio studio) {
-        return this.studioRepository.save(studio);
+    public Studio createStudio(StudioDTO dto) {
+        return this.studioRepository.save(new Studio(dto.name()));
     }
 }

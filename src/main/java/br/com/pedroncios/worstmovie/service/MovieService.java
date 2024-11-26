@@ -9,11 +9,14 @@ import br.com.pedroncios.worstmovie.entity.Studio;
 import br.com.pedroncios.worstmovie.exceptions.NoProducerException;
 import br.com.pedroncios.worstmovie.exceptions.NoStudioException;
 import br.com.pedroncios.worstmovie.repository.MovieRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class MovieService {
@@ -25,7 +28,8 @@ public class MovieService {
     @Autowired
     private StudioService studioService;
 
-    public Movie saveMovie(MovieDTO movieDTO, List<ProducerDTO> producers, List<StudioDTO> studios) throws NoProducerException, NoStudioException {
+    @Transactional
+    public Movie createMovie(MovieDTO movieDTO, List<ProducerDTO> producers, List<StudioDTO> studios) throws NoProducerException, NoStudioException {
         if(producers == null || producers.isEmpty()) {
             throw new NoProducerException();
         }
@@ -36,22 +40,19 @@ public class MovieService {
 
         Movie movie = new Movie(movieDTO);
 
+        Set<Producer> savedProducers = new HashSet<>();
         for (ProducerDTO producerDTO : producers) {
             Optional<Producer> producer = producerService.getProducerFromDTO(producerDTO);
-            Producer p = producer.orElseGet(() -> new Producer(producerDTO.name()));
-            /*producer.ifPresent(p -> {
-                this.producerService.saveProducer(p);
-            });*/
-            movie.addProducer(p);
+            savedProducers.add(producer.orElseGet(() -> producerService.createProducer(producerDTO)));
         }
+        movie.setProducers(savedProducers);
 
-//        for (StudioDTO studioDTO : studios) {
-//            Optional<Studio> studio = studioService.getStudioFromDTO(studioDTO);
-//            studio.ifPresent(s -> {
-//                this.studioService.saveStudio(s);
-//            });
-//            movie.addStudio(studio.orElseGet(() -> new Studio(studioDTO.name())));
-//        }
+        Set<Studio> savedStudios = new HashSet<>();
+        for (StudioDTO studioDTO :studios) {
+            Optional<Studio> studio = studioService.getStudioFromDTO(studioDTO);
+            savedStudios.add(studio.orElseGet(() -> studioService.createStudio(studioDTO)));
+        }
+        movie.setStudios(savedStudios);
 
         return this.movieRepository.save(movie);
     }
