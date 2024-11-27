@@ -12,12 +12,16 @@ import java.util.UUID;
 public interface ProducerRepository extends JpaRepository<Producer, UUID> {
     Optional<Producer> findFirstByName(String name);
 
-    @Query("""
-            SELECT new br.com.pedroncios.worstmovie.dto.ProducerPrizesDTO(p.name, f.awardYear)
-            FROM producers p
-            JOIN p.movies f
-            WHERE f.winner = true
-            ORDER BY p.name
-            """)
-    List<ProducerPrizesDTO> findProducersPrizes();
+    @Query(value = """
+                        SELECT p.name,
+                               COUNT(m.id) AS totalAwards,
+                               STRING_AGG(CAST(m.award_year AS VARCHAR), ', ') AS awardYears
+                        FROM producer p
+                        JOIN movie_producer mp ON mp.producer_id = p.id
+                        JOIN movie m ON m.id = mp.movie_id
+                        WHERE m.winner = true
+                        GROUP BY p.name
+                        HAVING COUNT(m.id) > 1
+                    """, nativeQuery = true)
+    List<Object[]> findProducersWithMultiplePrizes();
 }

@@ -2,6 +2,7 @@ package br.com.pedroncios.worstmovie.entity;
 
 import br.com.pedroncios.worstmovie.dto.MovieDTO;
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -11,8 +12,9 @@ import java.util.UUID;
 
 @NoArgsConstructor
 @Setter
-@Table(name = "movies")
-@Entity(name = "movies")
+@Getter
+@Table(name = "movie")
+@Entity(name = "movie")
 public class Movie {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

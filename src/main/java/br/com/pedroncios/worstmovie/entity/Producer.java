@@ -1,6 +1,7 @@
 package br.com.pedroncios.worstmovie.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
@@ -8,8 +9,9 @@ import java.util.Set;
 import java.util.UUID;
 
 @NoArgsConstructor
-@Table(name = "producers")
-@Entity(name = "producers")
+@Getter
+@Table(name = "producer")
+@Entity(name = "producer")
 public class Producer {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -21,4 +21,8 @@ public class StudioService {
     public Studio createStudio(StudioDTO dto) {
         return this.studioRepository.save(new Studio(dto.name()));
     }
+
+    public void cleanAllStudios() {
+        this.studioRepository.deleteAll();
+    }
 }

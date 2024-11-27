@@ -56,4 +56,8 @@ public class MovieService {
 
         return this.movieRepository.save(movie);
     }
+
+    public void cleanAllMovies() {
+        this.movieRepository.deleteAll();
+    }
 }

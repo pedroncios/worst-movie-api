@@ -1,5 +1,6 @@
 package br.com.pedroncios.worstmovie.service;
 
+import br.com.pedroncios.worstmovie.dto.AwardIntervalDTO;
 import br.com.pedroncios.worstmovie.dto.ProducerDTO;
 import br.com.pedroncios.worstmovie.dto.ProducerPrizesDTO;
 import br.com.pedroncios.worstmovie.entity.Producer;
@@ -25,6 +26,17 @@ public class ProducerService {
     }
 
     public List<ProducerPrizesDTO> getProducersPrizes() {
-        return this.producerRepository.findProducersPrizes();
+        List<Object[]> results = producerRepository.findProducersWithMultiplePrizes();
+        return results.stream()
+                .map(result -> new ProducerPrizesDTO(
+                        (String) result[0], // Nome do produtor
+                        ((Number) result[1]).longValue(), // Número de prêmios
+                        result[2].toString().split(", ") // Anos dos prêmios
+                ))
+                .toList();
+    }
+
+    public void cleanAllProducers() {
+        this.producerRepository.deleteAll();
     }
 }
