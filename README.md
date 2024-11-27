@@ -25,6 +25,7 @@ resource.csv.path=csv\\movielist.csv
 ```
 
 Para que o arquivo CSV seja carregado corretamente, ele deverá estar no seguinte padrão:
+- Os separadores das colunas do arquivo devem ser `;`;
 - Deve possuir uma linha de cabeçalho: `year;title;studios;producers;winner`;
 - Anos devem ser números inteiros no formato 4 dígitos;
 - Em caso de haver mais de um estúdio e/ou produtor no mesmo filme, devem ser separados por `,` e `and`;
