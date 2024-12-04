@@ -211,7 +211,7 @@ class WorstmovieApplicationTests {
 	}
 
 	@Test
-	public void intervalEndpoindShouldReturnValidData() throws IOException {
+	public void intervalEndpoindShouldReturnValidDataWhenTie() throws IOException {
 		csvService.importData("csv\\com_empate_movielist.csv");
 
 		String url = "http://localhost:" + port + "/awards/intervals";
@@ -245,5 +245,36 @@ class WorstmovieApplicationTests {
 		assertThat(maxInterval.interval()).isEqualTo(8);
 		assertThat(maxInterval.previousWin()).isEqualTo(2001);
 		assertThat(maxInterval.followingWin()).isEqualTo(2009);
+	}
+
+	@Test
+	public void intervalEndpoindShouldReturnValidDataUsing_movielist_csv() throws IOException {
+		csvService.importData("csv\\movielist.csv");
+
+		String url = "http://localhost:" + port + "/awards/intervals";
+		ResponseEntity<AwardIntervalDTO> response = restTemplate.getForEntity(url, AwardIntervalDTO.class);
+
+		assertThat(response.getStatusCode().value()).isEqualTo(200);
+
+		AwardIntervalDTO responseBody = response.getBody();
+
+		assertThat(responseBody).isNotNull();
+		assertThat(responseBody.min()).isNotNull();
+		assertThat(responseBody.max()).isNotNull();
+
+		assertThat(responseBody.min().size()).isEqualTo(1);
+		assertThat(responseBody.max().size()).isEqualTo(1);
+
+		IntervalDTO firstMinInterval = responseBody.min().get(0);
+		assertThat(firstMinInterval.producer()).isEqualTo("Joel Silver");
+		assertThat(firstMinInterval.interval()).isEqualTo(1);
+		assertThat(firstMinInterval.previousWin()).isEqualTo(1990);
+		assertThat(firstMinInterval.followingWin()).isEqualTo(1991);
+
+		IntervalDTO maxInterval = responseBody.max().get(0);
+		assertThat(maxInterval.producer()).isEqualTo("Matthew Vaughn");
+		assertThat(maxInterval.interval()).isEqualTo(13);
+		assertThat(maxInterval.previousWin()).isEqualTo(2002);
+		assertThat(maxInterval.followingWin()).isEqualTo(2015);
 	}
 }
